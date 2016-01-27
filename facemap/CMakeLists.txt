@@ -12,7 +12,7 @@ ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 project( FaceDetect )
 find_package( OpenCV REQUIRED )
-add_executable( FaceDetect.exe FaceDetect.cpp )
-target_link_libraries( FaceDetect.exe ${OpenCV_LIBS} )
+add_executable( FaceMap.exe FaceMap.cpp )
+target_link_libraries( FaceMap.exe ${OpenCV_LIBS} )
 
 
