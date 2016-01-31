@@ -61,6 +61,7 @@ void detectAndDisplay( Mat frame )
 {
     std::vector<Rect> faces;
     Mat frame_gray;
+    Mat testCrop;
 
     cvtColor( frame, frame_gray, COLOR_BGR2GRAY );
     equalizeHist( frame_gray, frame_gray );
@@ -72,10 +73,22 @@ void detectAndDisplay( Mat frame )
     {
         Mat faceROI = frame_gray( faces[i] );
         //-- Draw the face
-        Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
-        ellipse( frame, center, Size( faces[i].width/2, faces[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 0 ), 2, 8, 0 );
+        // Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
+        // ellipse( frame, center, Size( faces[i].width/2, faces[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 0 ), 2, 8, 0 );
+        int x = faces[i].x;
+        int y = faces[i].y;
+        int w = faces[i].width;
+        int h = faces[i].height;
+        rectangle( frame, Point(x,y), Point((x+w),(y+h)), Scalar( 255, 0, 0 ), 2, 8, 0 );
+        Rect ROI(x,y,w,h);
+        testCrop = frame(ROI);
 
     }
     //-- Show what you got
-    imshow( window_name, frame );
+    if(!testCrop.empty()) {
+      imshow( window_name, testCrop );
+    } else {
+      imshow( window_name, frame );
+    }
+
 }

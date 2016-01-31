@@ -6,7 +6,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    # Linux specific code
+    # Windows specific code
     set(OpenCV_DIR ${})
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
@@ -14,5 +14,3 @@ project( FaceDetect )
 find_package( OpenCV REQUIRED )
 add_executable( FaceMap.exe FaceMap.cpp )
 target_link_libraries( FaceMap.exe ${OpenCV_LIBS} )
-
-
