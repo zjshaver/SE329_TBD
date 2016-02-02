@@ -28,24 +28,26 @@
 using namespace cv;
 using namespace cv::face;
 using namespace std;
-static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, vector<string>& names, vector<string>& ids, char separator = ',') {
+static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, vector<string>& names, vector<string>& ids, vector<int>& attendance, char separator = ',') {
     std::ifstream file(filename.c_str(), ifstream::in);
     if (!file) {
         string error_message = "No valid input file was given, please check the given filename.";
         CV_Error(Error::StsBadArg, error_message);
     }
-    string line, path, name, userid;
+    string line, path, name, userid, attend;
     int i = 1;
     while (getline(file, line)) {
         stringstream liness(line);
         getline(liness, userid, separator);
         getline(liness, name, separator);
+	getline(liness, attend, separator);
 	if(!userid.empty() && !name.empty()){
 		while(getline(liness, path, separator)){
 		    	images.push_back(imread(path, 0));
 		    	labels.push_back(i);
 		    	names.push_back(name);
 			ids.push_back(userid);
+			attendance.push_back(atio(attend.c_str()));
 		}
 	}
 	i++;
@@ -63,7 +65,7 @@ typedef struct {
 
 /** Function Headers */
 std::vector<FaceLocation> detectAndDisplay( Mat frame );
-void checkAttendance();
+void checkAttendance(vector<Mat>& images, vector<int>& labels, vector<string>& names, vector<string>& ids, vector<int>& attendance, vector<int>& indexInFrame);
 
 /** Global variables */
 String face_cascade_name = "../facedetect/lbpcascade_frontalface.xml";
@@ -85,10 +87,11 @@ int main(int argc, const char *argv[]) {
   vector<int> labels;
   vector<string> names;
   vector<string>ids;
+  vector<int> attendance;
   // Read in the data. This can fail if no valid
   // input filename is given.
   try {
-    read_csv(fn_csv, images, labels, names, ids);
+    read_csv(fn_csv, images, labels, names, ids, attendance);
   } catch (cv::Exception& e) {
     cerr << "Error opening file \"" << fn_csv << "\". Reason: " << e.msg << endl;
     // nothing more we can do
@@ -124,6 +127,7 @@ int main(int argc, const char *argv[]) {
 
     //-- 3. Apply the classifier to the frame
     std::vector<FaceLocation> testSample = detectAndDisplay( frame );
+    std::vector<int> indexInFrame = new std::vector<int>(); //TODO this may or may not work
 
     for(int i = 0; i < testSample.size(); i++){
       // The following line predicts the label of a given
@@ -138,6 +142,8 @@ int main(int argc, const char *argv[]) {
         }
       }
 
+      indexInFrame.push_back(index); //TODO this may or may not work
+
       rectangle( frame, Point(testSample[i].x,testSample[i].y), Point((testSample[i].x+testSample[i].w),(testSample[i].y+testSample[i].h)), Scalar( 255, 0, 0 ), 2, 8, 0 );
       putText( frame , names[index], Point(testSample[i].x,testSample[i].y), CV_FONT_HERSHEY_SIMPLEX, 1.0, Scalar::all(255), 2);
     }
@@ -150,7 +156,7 @@ int main(int argc, const char *argv[]) {
 	 break; break;
     }
     if( (char)c == 32 ) {
-	checkAttendance();
+	checkAttendance(images, labels, names, ids, attendance, facesInFrame); //TODO this may or may not work
     }
   }
 
@@ -158,7 +164,7 @@ int main(int argc, const char *argv[]) {
   return 0;
 }
 
-void checkAttendance(){
+void checkAttendance(vector<Mat>& images, vector<int>& labels, vector<string>& names, vector<string>& ids, vector<int>& attendance, vector<int>& indexInFrame){
   printf("Spacebar pressed\n");
 }
 
