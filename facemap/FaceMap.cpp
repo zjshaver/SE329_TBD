@@ -58,7 +58,7 @@ typedef struct {
 } FaceLocation;
 
 /** Function Headers */
-FaceLocation detectAndDisplay( Mat frame );
+std::vector<FaceLocation> detectAndDisplay( Mat frame );
 
 /** Global variables */
 String face_cascade_name = "../facedetect/lbpcascade_frontalface.xml";
@@ -117,22 +117,24 @@ int main(int argc, const char *argv[]) {
         }
 
         //-- 3. Apply the classifier to the frame
-        FaceLocation testSample = detectAndDisplay( frame );
+        std::vector<FaceLocation> testSample = detectAndDisplay( frame );
 
-        // The following line predicts the label of a given
-        // test image:
-        int predictedLabel = model->predict(testSample.pic);
+	for(int i = 0; i < testSample.size(); i++){
+		// The following line predicts the label of a given
+		// test image:
+		int predictedLabel = model->predict(testSample[i].pic);
 
-	int index = 0;
-	for(int j = 0; j < labels.size(); j++){
-		if(labels[j] == predictedLabel){
-			index = j;
-			break;
+		int index = 0;
+		for(int j = 0; j < labels.size(); j++){
+			if(labels[j] == predictedLabel){
+				index = j;
+				break;
+			}
 		}
-	}
 
-	rectangle( frame, Point(testSample.x,testSample.y), Point((testSample.x+testSample.w),(testSample.y+testSample.h)), Scalar( 255, 0, 0 ), 2, 8, 0 );
-	putText( frame , names[index], Point(testSample.x,testSample.y), CV_FONT_HERSHEY_SIMPLEX, 1.0, Scalar::all(255), 2);
+		rectangle( frame, Point(testSample[i].x,testSample[i].y), Point((testSample[i].x+testSample[i].w),(testSample[i].y+testSample[i].h)), Scalar( 255, 0, 0 ), 2, 8, 0 );
+		putText( frame , names[index], Point(testSample[i].x,testSample[i].y), CV_FONT_HERSHEY_SIMPLEX, 1.0, Scalar::all(255), 2);
+	}
 
 	imshow(window_name, frame);
 
@@ -148,8 +150,9 @@ int main(int argc, const char *argv[]) {
 /**
  * @function detectAndDisplay
  */
-FaceLocation detectAndDisplay( Mat frame )
+std::vector<FaceLocation> detectAndDisplay( Mat frame )
 {
+    std::vector<FaceLocation> fls;
     FaceLocation fl;
     std::vector<Rect> faces;
     Mat frame_gray;
@@ -164,9 +167,7 @@ FaceLocation detectAndDisplay( Mat frame )
     for( size_t i = 0; i < faces.size(); i++ )
     {
         Mat faceROI = frame_gray( faces[i] );
-        //-- Draw the face
-        // Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
-        // ellipse( frame, center, Size( faces[i].width/2, faces[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 0 ), 2, 8, 0 );
+
         fl.x = faces[i].x;
         fl.y = faces[i].y;
         fl.w = faces[i].width;
@@ -174,16 +175,18 @@ FaceLocation detectAndDisplay( Mat frame )
         Rect ROI(fl.x,fl.y,fl.w,fl.h);
         testCrop = frame_gray(ROI);
 
+        //-- Show what you got
+        if(!testCrop.empty()) {
+          //imshow( window_name, testCrop );
+          fl.pic = testCrop;
+        } else {
+          //imshow( window_name, frame );
+          fl.pic = frame_gray;
+        }
+	fls.push_back(fl);
     }
 
-    //-- Show what you got
-    if(!testCrop.empty()) {
-      //imshow( window_name, testCrop );
-      fl.pic = testCrop;
-    } else {
-      //imshow( window_name, frame );
-      fl.pic = frame_gray;
-    }
 
-    return fl;
+
+    return fls;
 }
