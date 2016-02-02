@@ -59,6 +59,7 @@ typedef struct {
 
 /** Function Headers */
 std::vector<FaceLocation> detectAndDisplay( Mat frame );
+void checkAttendance();
 
 /** Global variables */
 String face_cascade_name = "../facedetect/lbpcascade_frontalface.xml";
@@ -141,11 +142,16 @@ int main(int argc, const char *argv[]) {
         //-- bail out if escape was pressed
         int c = waitKey(10);
         if( (char)c == 27 ) { break; break; }
+	if( (char)c == 32 ) { checkAttendance(); }
     }
 
 
     return 0;
 }
+
+void checkAttendance(){
+	printf("Spacebar pressed\n");
+}	
 
 /**
  * @function detectAndDisplay
