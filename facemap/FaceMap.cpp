@@ -28,23 +28,27 @@
 using namespace cv;
 using namespace cv::face;
 using namespace std;
-static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, vector<string>& names, char separator = ';') {
+static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, vector<string>& names, vector<string>& ids, char separator = ',') {
     std::ifstream file(filename.c_str(), ifstream::in);
     if (!file) {
         string error_message = "No valid input file was given, please check the given filename.";
         CV_Error(Error::StsBadArg, error_message);
     }
-    string line, path, classlabel, name;
+    string line, path, name, userid;
+    int i = 1;
     while (getline(file, line)) {
         stringstream liness(line);
-        getline(liness, path, separator);
-        getline(liness, classlabel, separator);
-	getline(liness, name);
-        if(!path.empty() && !classlabel.empty()) {
-            images.push_back(imread(path, 0));
-            labels.push_back(atoi(classlabel.c_str()));
-            names.push_back(name);
-        }
+        getline(liness, userid, separator);
+        getline(liness, name, separator);
+	if(!userid.empty() && !name.empty()){
+		while(getline(liness, path, separator)){
+		    	images.push_back(imread(path, 0));
+		    	labels.push_back(i);
+		    	names.push_back(name);
+			ids.push_back(userid);
+		}
+	}
+	i++;
     }
 }
 
@@ -80,10 +84,11 @@ int main(int argc, const char *argv[]) {
   vector<Mat> images;
   vector<int> labels;
   vector<string> names;
+  vector<string>ids;
   // Read in the data. This can fail if no valid
   // input filename is given.
   try {
-    read_csv(fn_csv, images, labels, names);
+    read_csv(fn_csv, images, labels, names, ids);
   } catch (cv::Exception& e) {
     cerr << "Error opening file \"" << fn_csv << "\". Reason: " << e.msg << endl;
     // nothing more we can do
@@ -141,8 +146,12 @@ int main(int argc, const char *argv[]) {
 
     //-- bail out if escape was pressed
     int c = waitKey(10);
-    if( (char)c == 27 ) { break; break; }
-    if( (char)c == 32 ) { checkAttendance(); }
+    if( (char)c == 27 ) {
+	 break; break;
+    }
+    if( (char)c == 32 ) {
+	checkAttendance();
+    }
   }
 
 
