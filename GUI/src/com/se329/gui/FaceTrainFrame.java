@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -16,6 +18,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
+
+import com.firebase.client.Firebase;
 
 public class FaceTrainFrame {
 
@@ -40,6 +44,8 @@ public class FaceTrainFrame {
 	private static final String NEW_LINE_SEPARATOR = "\n";
 	// File header for CSV file
 	private static final String FILE_HEADER = "name,photo1,photo2,photo3";
+	
+	private static Firebase firebaseRef = new Firebase("https://torrid-heat-4382.firebaseio.com/");
 
 	/**
 	 * Launch the application.
@@ -253,6 +259,15 @@ public class FaceTrainFrame {
 			writer.append(photoPath3);
 			writer.append(NEW_LINE_SEPARATOR);
 			System.out.println("Added subject successfully!");
+			
+			//Testing adding to database
+			Firebase subjectRef = firebaseRef.child("subjects");
+			
+			Map<String, String> subject1 = new HashMap<String, String>();
+			subject1.put("name", name);
+			subject1.put("timesAttended", "0");
+			subjectRef.push().setValue(subject1);
+			
 		} catch (Exception e) {
 			System.out.println("Error adding subject!");
 			return false;
