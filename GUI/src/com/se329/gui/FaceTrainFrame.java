@@ -293,7 +293,7 @@ public class FaceTrainFrame {
 //										frmFaceTrainer.setVisible(false);
 //										frmFaceTrainer.dispose();
 										
-										startFaceRecognition();
+										//startFaceRecognition();
 										
 									}
 								});
@@ -337,7 +337,9 @@ public class FaceTrainFrame {
 
 	private boolean createFile() {
 		try {
-			writer = new FileWriter(outputFileName, false);
+			writer = new FileWriter(outputFileName, true);
+			
+			System.out.println("creating file");
 			
 			for(Subject sub : subjects){
 				writer.append(sub.getId());
@@ -351,6 +353,8 @@ public class FaceTrainFrame {
 				}
 				writer.append(NEW_LINE_SEPARATOR);
 			}
+			writer.flush();
+			writer.close();
 		} catch (Exception e) {
 			System.out.println("Error creating csv!");
 			return false;
