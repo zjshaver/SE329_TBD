@@ -39,12 +39,14 @@ public class FaceTrainFrame {
 	//DEBUG
 	//public static final String outputFileName = "../facemap/facesDB.csv";
 	//public static final String exeFilePath = "../faceMap.exe";
+	//public static final String picsDir = "../pics";
 
 	//RELEASE
 	public static final String outputFileName = "facesDB.csv";
 	public static final String exeFileName = "faceMap.exe";
+	public static final String picsDir = "pics";
 	
-	public static String currentDir = "";
+	public static String currentDir = ""; //set upon intialization
 	
 	private static FileWriter writer = null;
 
@@ -266,7 +268,9 @@ public class FaceTrainFrame {
 		photoButton_1.setBackground(Color.CYAN);
 		photoButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				currSub.appendPhotoPath("../pics/" + selectPhoto());
+				String photoName = selectPhoto();
+				if (photoName != null)			
+					currSub.appendPhotoPath("../pics/" + selectPhoto());
 			}
 		});
 
@@ -363,8 +367,10 @@ public class FaceTrainFrame {
 	}
 
 	private static String selectPhoto() {
+		String picsFilePath = new File(currentDir, picsDir).toString();
+		
 		File photo;
-		JFileChooser chooser = new JFileChooser();
+		JFileChooser chooser = new JFileChooser(picsFilePath);
 		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
 		int option = chooser.showOpenDialog(frmFaceTrainer);
