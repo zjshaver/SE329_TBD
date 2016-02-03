@@ -146,7 +146,7 @@ int main(int argc, const char *argv[]) {
         }
       }
 
-      indexInFrame.push_back(index); //TODO this may or may not work
+      indexInFrame.push_back(index);
 
       rectangle( frame, Point(testSample[i].x,testSample[i].y), Point((testSample[i].x+testSample[i].w),(testSample[i].y+testSample[i].h)), Scalar( 255, 0, 0 ), 2, 8, 0 );
       putText( frame , names[index], Point(testSample[i].x,testSample[i].y), CV_FONT_HERSHEY_SIMPLEX, 1.0, Scalar::all(255), 2);
@@ -160,7 +160,7 @@ int main(int argc, const char *argv[]) {
 	 break; break;
     }
     if( (char)c == 32 ) {
-	checkAttendance(images, labels, names, ids, attendance, indexInFrame); //TODO this may or may not work
+	checkAttendance(images, labels, names, ids, attendance, indexInFrame);
     }
   }
 
@@ -172,22 +172,23 @@ void checkAttendance(vector<Mat>& images, vector<int>& labels, vector<string>& n
   printf("Spacebar pressed\n");
 
   for(int j = 0; j < ids.size(); j++) {
-    printf("%s\n", ids[j]);
+    printf("%s\n", ids[j].c_str());
   }
 
   int index = 0;
   string str_attend;
-  ostringstream convert;
+  stringstream convert;
   for(int i = 0; i < indexInFrame.size(); i++) {
     index = indexInFrame[i];
-    convert << (attendance[i]+1);
+    attendance[index] = (attendance[index]+1);
+    convert << (attendance[i]);
     str_attend = convert.str();
+
     FILE *fp;
     char file_type[40];
     // system(("curl.exe -b cookie.txt -d test="+line+"  http://example.com").c_str());
     //curl -X PATCH -d '{"timesAttended": "3"}' 'https://torrid-heat-4382.firebaseio.com/subjects/-K9YVGntuVU6LGLANABC.json'
-
-    fp = popen(("curl -X PATCH -d '{ timesAttended: "+str_attend+" }' 'https://torrid-heat-4382.firebaseio.com/subjects/"+ids[index]+".json'").c_str(), "r");
+    fp = popen(("curl -X PATCH -d '{ \"timesAttended\": \""+str_attend+"\" }' 'https://torrid-heat-4382.firebaseio.com/subjects/"+ids[index]+".json'").c_str(), "r");
     if (fp == NULL) {
         printf("Failed to run command\n" );
         exit;
@@ -199,24 +200,6 @@ void checkAttendance(vector<Mat>& images, vector<int>& labels, vector<string>& n
 
     pclose(fp);
   }
-  // Other example code
-  /*CURL* curl; //our curl object
-
-  curl_global_init(CURL_GLOBAL_ALL); //pretty obvious
-  curl = curl_easy_init();
-
-  curl_easy_setopt(curl, CURLOPT_URL, "https://torrid-heat-4382.firebaseio.com/");
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
-  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //tell curl to output its progress
-
-  curl_easy_perform(curl);
-
-  cout << endl << data << endl;
-  cin.get();
-
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();*/
-
 }
 
 /**
@@ -259,18 +242,3 @@ std::vector<FaceLocation> detectAndDisplay( Mat frame )
   }
   return fls;
 }
-
-
-/*
-size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up)
-{ //callback must have this declaration
-    //buf is a pointer to the data that curl has for us
-    //size*nmemb is the size of the buffer
-
-    for (int c = 0; c<size*nmemb; c++)
-    {
-        data.push_back(buf[c]);
-    }
-    return size*nmemb; //tell curl how many bytes we handled
-}
-*/
