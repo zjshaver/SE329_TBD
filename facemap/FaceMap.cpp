@@ -29,27 +29,31 @@
 using namespace cv;
 using namespace cv::face;
 using namespace std;
-static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, vector<string>& names, char separator = ';') {
+static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, vector<string>& names, vector<string>& ids, vector<int>& attendance, char separator = ',') {
     std::ifstream file(filename.c_str(), ifstream::in);
     if (!file) {
         string error_message = "No valid input file was given, please check the given filename.";
         CV_Error(Error::StsBadArg, error_message);
     }
-    string line, path, classlabel, name;
+    string line, path, name, userid, attend;
+    int i = 1;
     while (getline(file, line)) {
         stringstream liness(line);
-        getline(liness, path, separator);
-        getline(liness, classlabel, separator);
-	getline(liness, name);
-        if(!path.empty() && !classlabel.empty()) {
-            images.push_back(imread(path, 0));
-            labels.push_back(atoi(classlabel.c_str()));
-            names.push_back(name);
-        }
+        getline(liness, userid, separator);
+        getline(liness, name, separator);
+	getline(liness, attend, separator);
+	if(!userid.empty() && !name.empty()){
+		while(getline(liness, path, separator)){
+		    	images.push_back(imread(path, 0));
+		    	labels.push_back(i);
+		    	names.push_back(name);
+			ids.push_back(userid);
+			attendance.push_back(atio(attend.c_str()));
+		}
+	}
+	i++;
     }
 }
-
-
 
 /** Structs */
 typedef struct {
@@ -62,14 +66,14 @@ typedef struct {
 
 /** Function Headers */
 std::vector<FaceLocation> detectAndDisplay( Mat frame );
-void checkAttendance();
-size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up);
+// size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up);
+void checkAttendance(vector<Mat>& images, vector<int>& labels, vector<string>& names, vector<string>& ids, vector<int>& attendance, vector<int>& indexInFrame);
 
 /** Global variables */
 String face_cascade_name = "../facedetect/lbpcascade_frontalface.xml";
 CascadeClassifier face_cascade;
 String window_name = "Capture - Face detection";
-string data; //will hold the url's contents
+// string data; //will hold the url's contents
 
 
 int main(int argc, const char *argv[]) {
@@ -85,10 +89,12 @@ int main(int argc, const char *argv[]) {
   vector<Mat> images;
   vector<int> labels;
   vector<string> names;
+  vector<string>ids;
+  vector<int> attendance;
   // Read in the data. This can fail if no valid
   // input filename is given.
   try {
-    read_csv(fn_csv, images, labels, names);
+    read_csv(fn_csv, images, labels, names, ids, attendance);
   } catch (cv::Exception& e) {
     cerr << "Error opening file \"" << fn_csv << "\". Reason: " << e.msg << endl;
     // nothing more we can do
@@ -124,6 +130,7 @@ int main(int argc, const char *argv[]) {
 
     //-- 3. Apply the classifier to the frame
     std::vector<FaceLocation> testSample = detectAndDisplay( frame );
+    std::vector<int> indexInFrame = new std::vector<int>(); //TODO this may or may not work
 
     for(int i = 0; i < testSample.size(); i++){
       // The following line predicts the label of a given
@@ -138,6 +145,8 @@ int main(int argc, const char *argv[]) {
         }
       }
 
+      indexInFrame.push_back(index); //TODO this may or may not work
+
       rectangle( frame, Point(testSample[i].x,testSample[i].y), Point((testSample[i].x+testSample[i].w),(testSample[i].y+testSample[i].h)), Scalar( 255, 0, 0 ), 2, 8, 0 );
       putText( frame , names[index], Point(testSample[i].x,testSample[i].y), CV_FONT_HERSHEY_SIMPLEX, 1.0, Scalar::all(255), 2);
     }
@@ -146,15 +155,19 @@ int main(int argc, const char *argv[]) {
 
     //-- bail out if escape was pressed
     int c = waitKey(10);
-    if( (char)c == 27 ) { break; break; }
-    if( (char)c == 32 ) { checkAttendance(); }
+    if( (char)c == 27 ) {
+	 break; break;
+    }
+    if( (char)c == 32 ) {
+	checkAttendance(images, labels, names, ids, attendance, facesInFrame); //TODO this may or may not work
+    }
   }
 
 
   return 0;
 }
 
-void checkAttendance(){
+void checkAttendance(vector<Mat>& images, vector<int>& labels, vector<string>& names, vector<string>& ids, vector<int>& attendance, vector<int>& indexInFrame){
   printf("Spacebar pressed\n");
 
   FILE *fp;
@@ -234,7 +247,7 @@ std::vector<FaceLocation> detectAndDisplay( Mat frame )
 }
 
 
-
+/*
 size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up)
 { //callback must have this declaration
     //buf is a pointer to the data that curl has for us
@@ -246,3 +259,4 @@ size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up)
     }
     return size*nmemb; //tell curl how many bytes we handled
 }
+*/
