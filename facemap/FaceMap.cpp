@@ -21,6 +21,7 @@
 #include "opencv2/core.hpp"
 #include "opencv2/face.hpp"
 #include "opencv2/highgui.hpp"
+// #include <curl/curl.h>
 #include <iostream>
 #include <stdio.h>
 #include <fstream>
@@ -48,6 +49,8 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
     }
 }
 
+
+
 /** Structs */
 typedef struct {
 	Mat pic;
@@ -60,11 +63,13 @@ typedef struct {
 /** Function Headers */
 std::vector<FaceLocation> detectAndDisplay( Mat frame );
 void checkAttendance();
+size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up);
 
 /** Global variables */
 String face_cascade_name = "../facedetect/lbpcascade_frontalface.xml";
 CascadeClassifier face_cascade;
 String window_name = "Capture - Face detection";
+string data; //will hold the url's contents
 
 
 int main(int argc, const char *argv[]) {
@@ -151,6 +156,40 @@ int main(int argc, const char *argv[]) {
 
 void checkAttendance(){
   printf("Spacebar pressed\n");
+
+  FILE *fp;
+  char file_type[40];
+
+  fp = popen("curl -X PUT -d '{ "-K9YVGntuVU6LGLANCXD": { "name": "Zach Shaver", "timesAttended": "1" } }' 'https://torrid-heat-4382.firebaseio.com/subjects.json'");
+  if (fp == NULL) {
+      printf("Failed to run command\n" );
+      exit;
+  }
+
+  while (fgets(file_type, sizeof(file_type), fp) != NULL) {
+      printf("%s", file_type);
+  }
+
+  pclose(fp);
+
+  // Other example code
+  /*CURL* curl; //our curl object
+
+  curl_global_init(CURL_GLOBAL_ALL); //pretty obvious
+  curl = curl_easy_init();
+
+  curl_easy_setopt(curl, CURLOPT_URL, "https://torrid-heat-4382.firebaseio.com/");
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
+  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //tell curl to output its progress
+
+  curl_easy_perform(curl);
+
+  cout << endl << data << endl;
+  cin.get();
+
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();*/
+
 }
 
 /**
@@ -192,4 +231,18 @@ std::vector<FaceLocation> detectAndDisplay( Mat frame )
     fls.push_back(fl);
   }
   return fls;
+}
+
+
+
+size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up)
+{ //callback must have this declaration
+    //buf is a pointer to the data that curl has for us
+    //size*nmemb is the size of the buffer
+
+    for (int c = 0; c<size*nmemb; c++)
+    {
+        data.push_back(buf[c]);
+    }
+    return size*nmemb; //tell curl how many bytes we handled
 }
