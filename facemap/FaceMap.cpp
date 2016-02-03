@@ -166,6 +166,8 @@ int main(int argc, const char *argv[]) {
     }
 
     imshow(window_name, frame);
+    Mat testimg = imread("../pics/zach1.jpg",0);
+    imshow("blank", testimg);
 
     //-- bail out if escape was pressed
     int c = waitKey(10);
