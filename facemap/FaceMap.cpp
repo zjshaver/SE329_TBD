@@ -44,11 +44,17 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
 	getline(liness, attend, separator);
 	if(!userid.empty() && !name.empty()){
 		while(getline(liness, path, separator)){
-		    	images.push_back(imread(path, 0));
-		    	labels.push_back(i);
-		    	names.push_back(name);
-			ids.push_back(userid);
-			attendance.push_back(atoi(attend.c_str()));
+      Mat m = imread(path, 0);
+      if ( m.empty() )
+      {
+           cerr << path << " could not be read!" << endl;
+           return;
+      }
+      images.push_back(m);
+      labels.push_back(i);
+      names.push_back(name);
+      ids.push_back(userid);
+      attendance.push_back(atoi(attend.c_str()));
 		}
 	}
 	i++;
@@ -106,8 +112,15 @@ int main(int argc, const char *argv[]) {
     string error_message = "This demo needs at least 2 images to work. Please add more images to your data set!";
     CV_Error(Error::StsError, error_message);
   }
-
-  Ptr<LBPHFaceRecognizer> model = createLBPHFaceRecognizer();
+  /*Size size(1075,1500);
+  for(int i=0; i < images.size(); i++) {
+    resize(images[i],images[i],size);
+    cout << "Resizing image " << i << " to " << images[i].size() << endl;
+  }*/
+  //Ptr<FaceRecognizer> model = createFisherFaceRecognizer();
+  Ptr<LBPHFaceRecognizer> model = createLBPHFaceRecognizer(1,8,8,8,123.0);
+  //Ptr<LBPHFaceRecognizer> model = createLBPHFaceRecognizer(2,16,16,16,123.0);
+  //Ptr<FaceRecognizer> model = createEigenFaceRecognizer();
   model->train(images, labels);
 
   // Insert FaceDetect Code and input images
@@ -161,7 +174,7 @@ int main(int argc, const char *argv[]) {
     }
     if( (char)c == 32 ) {
 	checkAttendance(images, labels, names, ids, attendance, indexInFrame);
-    }
+}
   }
 
 
@@ -171,8 +184,8 @@ int main(int argc, const char *argv[]) {
 void checkAttendance(vector<Mat>& images, vector<int>& labels, vector<string>& names, vector<string>& ids, vector<int>& attendance, vector<int>& indexInFrame){
   printf("Spacebar pressed\n");
 
-  for(int j = 0; j < ids.size(); j++) {
-    printf("%s\n", ids[j].c_str());
+  for(int j = 0; j < indexInFrame.size(); j++) {
+    printf("%d\n", indexInFrame[j]);
   }
 
   int index = 0;
@@ -181,9 +194,9 @@ void checkAttendance(vector<Mat>& images, vector<int>& labels, vector<string>& n
   for(int i = 0; i < indexInFrame.size(); i++) {
     index = indexInFrame[i];
     attendance[index] = (attendance[index]+1);
-    convert << (attendance[i]);
+    convert.str("");
+    convert << (attendance[index]);
     str_attend = convert.str();
-
     FILE *fp;
     char file_type[40];
     // system(("curl.exe -b cookie.txt -d test="+line+"  http://example.com").c_str());
@@ -238,6 +251,8 @@ std::vector<FaceLocation> detectAndDisplay( Mat frame )
       //imshow( window_name, frame );
       fl.pic = frame_gray;
     }
+    //Size size(1075,1500);
+    //resize(fl.pic,fl.pic,size);
     fls.push_back(fl);
   }
   return fls;
