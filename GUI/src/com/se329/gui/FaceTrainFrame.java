@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,14 +51,20 @@ import javax.swing.table.DefaultTableModel;
 
 public class FaceTrainFrame {
 
-	public static final String outputFileName = "../facemap/facesDB.csv";
+	//DEBUG
+	//public static final String outputFileName = "../facemap/facesDB.csv";
+	//public static final String exeFilePath = "../faceMap.exe";
 
-	public static final String exeFilePath = "../faceMap.exe";
-
+	//RELEASE
+	public static final String outputFileName = "facesDB.csv";
+	public static final String exeFileName = "faceMap.exe";
+	
+	public static String currentDir = "";
+	
 	private static FileWriter writer = null;
 
 	private static JFrame frmFaceTrainer;
-
+	private static JPanel panel_1;
 	private static JLabel photoLabel_1;
 
 	private static DefaultListModel<String> listModel = new DefaultListModel<String>();
@@ -71,18 +79,32 @@ public class FaceTrainFrame {
 	private static final String NEW_LINE_SEPARATOR = "\n";
 	// File header for CSV file
 
-	private Firebase firebaseRef = new Firebase(
+	private static Firebase firebaseRef = new Firebase(
 			"https://torrid-heat-4382.firebaseio.com/");
 	private static JTable table;
 	private static JTextField nameTxt;
 
 	private static final Object[] columnNames = { "Name", "Attendance" };
-	private Object[][] tableData;
+	private static Object[][] tableData;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		//Find current directory of the .jar file
+		CodeSource codeSource = FaceTrainFrame.class.getProtectionDomain().getCodeSource();
+		File jarFile;
+		try {
+			jarFile = new File(codeSource.getLocation().toURI().getPath());
+			String jarDir = jarFile.getParentFile().getPath();
+			currentDir = jarDir;
+			System.out.println(currentDir);
+			
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
+			System.exit(1);
+		}
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -96,8 +118,10 @@ public class FaceTrainFrame {
 
 	/**
 	 * Create the application.
+	 * @wbp.parser.entryPoint
 	 */
 	public FaceTrainFrame() {
+		initialize();
 		querySubjects();
 
 	}
@@ -129,7 +153,20 @@ public class FaceTrainFrame {
 				}
 				System.out.println("Size of arraylist " + subjects.size());
 				setTableData();
-				initialize();
+				
+				DefaultTableModel model = (DefaultTableModel) table.getModel();
+				model.setDataVector(tableData, columnNames);
+				
+				//table = new JTable(new DefaultTableModel(tableData, columnNames));
+				//GridBagConstraints gbc_table = new GridBagConstraints();
+				//gbc_table.fill = GridBagConstraints.BOTH;
+				//gbc_table.gridx = 0;
+				//gbc_table.gridy = 0;
+				//panel_1.add(table, gbc_table);
+				
+				frmFaceTrainer.getContentPane().validate();
+				frmFaceTrainer.getContentPane().repaint();
+				//initialize();
 			}
 
 			@Override
@@ -309,16 +346,17 @@ public class FaceTrainFrame {
 				System.out.println("Closing frame and starting executable.");
 				createFile();
 
+				startFaceRecognition();
+				
 				// Close frame
-				// frmFaceTrainer.setVisible(false);
-				// frmFaceTrainer.dispose();
-
-				// startFaceRecognition();
+				frmFaceTrainer.setVisible(false);
+				frmFaceTrainer.dispose();
+				System.exit(0);
 
 			}
 		});
 
-		JPanel panel_1 = new JPanel();
+		panel_1 = new JPanel();
 		frmFaceTrainer.getContentPane().add(panel_1, BorderLayout.CENTER);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[] { 0, 0 };
@@ -358,7 +396,8 @@ public class FaceTrainFrame {
 	private boolean createFile() {
 		
 		try {
-			writer = new FileWriter(outputFileName, false);
+			String outputFilePath = new File(currentDir, outputFileName).toString();
+			writer = new FileWriter(outputFilePath, false);
 
 			System.out.println("creating file");
 
@@ -392,7 +431,7 @@ public class FaceTrainFrame {
 
 	private void startFaceRecognition() {
 		// TODO
-
+		String exeFilePath = new File(currentDir, exeFileName).toString();
 		if (new File(exeFilePath).exists()) {
 			try {
 
