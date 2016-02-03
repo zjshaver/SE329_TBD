@@ -48,7 +48,7 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
 		    	labels.push_back(i);
 		    	names.push_back(name);
 			ids.push_back(userid);
-			attendance.push_back(atio(attend.c_str()));
+			attendance.push_back(atoi(attend.c_str()));
 		}
 	}
 	i++;
@@ -100,6 +100,7 @@ int main(int argc, const char *argv[]) {
     // nothing more we can do
     exit(1);
   }
+
   // Quit if there are not enough images for this demo.
   if(images.size() <= 1) {
     string error_message = "This demo needs at least 2 images to work. Please add more images to your data set!";
@@ -130,7 +131,7 @@ int main(int argc, const char *argv[]) {
 
     //-- 3. Apply the classifier to the frame
     std::vector<FaceLocation> testSample = detectAndDisplay( frame );
-    std::vector<int> indexInFrame = new std::vector<int>(); //TODO this may or may not work
+    vector<int> indexInFrame; //TODO this may or may not work
 
     for(int i = 0; i < testSample.size(); i++){
       // The following line predicts the label of a given
@@ -159,7 +160,7 @@ int main(int argc, const char *argv[]) {
 	 break; break;
     }
     if( (char)c == 32 ) {
-	checkAttendance(images, labels, names, ids, attendance, facesInFrame); //TODO this may or may not work
+	checkAttendance(images, labels, names, ids, attendance, indexInFrame); //TODO this may or may not work
     }
   }
 
@@ -170,21 +171,34 @@ int main(int argc, const char *argv[]) {
 void checkAttendance(vector<Mat>& images, vector<int>& labels, vector<string>& names, vector<string>& ids, vector<int>& attendance, vector<int>& indexInFrame){
   printf("Spacebar pressed\n");
 
-  FILE *fp;
-  char file_type[40];
-
-  fp = popen("curl -X PUT -d '{ "-K9YVGntuVU6LGLANCXD": { "name": "Zach Shaver", "timesAttended": "1" } }' 'https://torrid-heat-4382.firebaseio.com/subjects.json'");
-  if (fp == NULL) {
-      printf("Failed to run command\n" );
-      exit;
+  for(int j = 0; j < ids.size(); j++) {
+    printf("%s\n", ids[j]);
   }
 
-  while (fgets(file_type, sizeof(file_type), fp) != NULL) {
-      printf("%s", file_type);
+  int index = 0;
+  string str_attend;
+  ostringstream convert;
+  for(int i = 0; i < indexInFrame.size(); i++) {
+    index = indexInFrame[i];
+    convert << (attendance[i]+1);
+    str_attend = convert.str();
+    FILE *fp;
+    char file_type[40];
+    // system(("curl.exe -b cookie.txt -d test="+line+"  http://example.com").c_str());
+    //curl -X PATCH -d '{"timesAttended": "3"}' 'https://torrid-heat-4382.firebaseio.com/subjects/-K9YVGntuVU6LGLANABC.json'
+
+    fp = popen(("curl -X PATCH -d '{ timesAttended: "+str_attend+" }' 'https://torrid-heat-4382.firebaseio.com/subjects/"+ids[index]+".json'").c_str(), "r");
+    if (fp == NULL) {
+        printf("Failed to run command\n" );
+        exit;
+    }
+
+    while (fgets(file_type, sizeof(file_type), fp) != NULL) {
+        printf("%s", file_type);
+    }
+
+    pclose(fp);
   }
-
-  pclose(fp);
-
   // Other example code
   /*CURL* curl; //our curl object
 
