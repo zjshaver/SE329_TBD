@@ -270,7 +270,7 @@ public class FaceTrainFrame {
 			public void actionPerformed(ActionEvent e) {
 				String photoName = selectPhoto();
 				if (photoName != null)
-					currSub.appendPhotoPath("../pics/" + selectPhoto());
+					currSub.appendPhotoPath("./pics/" + photoName);
 			}
 		});
 
@@ -460,3 +460,4 @@ public class FaceTrainFrame {
 		}
 	}
 }
+
