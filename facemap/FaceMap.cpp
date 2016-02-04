@@ -165,9 +165,9 @@ int main(int argc, const char *argv[]) {
       putText( frame , names[index], Point(testSample[i].x,testSample[i].y), CV_FONT_HERSHEY_SIMPLEX, 1.0, Scalar::all(255), 2);
     }
 
-    imshow(window_name, frame);
-    Mat testimg = imread("../pics/zach1.jpg",0);
-    imshow("blank", testimg);
+    //imshow(window_name, frame);
+    //Mat testimg = imread("../pics/josh7.jpg",0);
+    //imshow("blank", testimg);
 
     //-- bail out if escape was pressed
     int c = waitKey(10);
