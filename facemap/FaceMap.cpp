@@ -76,7 +76,7 @@ std::vector<FaceLocation> detectAndDisplay( Mat frame );
 void checkAttendance(vector<Mat>& images, vector<int>& labels, vector<string>& names, vector<string>& ids, vector<int>& attendance, vector<int>& indexInFrame);
 
 /** Global variables */
-String face_cascade_name = "../facedetect/lbpcascade_frontalface.xml";
+String face_cascade_name = "./facedetect/lbpcascade_frontalface.xml";
 CascadeClassifier face_cascade;
 String window_name = "Capture - Face detection";
 // string data; //will hold the url's contents
@@ -165,7 +165,7 @@ int main(int argc, const char *argv[]) {
       putText( frame , names[index], Point(testSample[i].x,testSample[i].y), CV_FONT_HERSHEY_SIMPLEX, 1.0, Scalar::all(255), 2);
     }
 
-    //imshow(window_name, frame);
+    imshow(window_name, frame);
     //Mat testimg = imread("../pics/josh7.jpg",0);
     //imshow("blank", testimg);
 
