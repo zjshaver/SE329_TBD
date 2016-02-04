@@ -42,8 +42,8 @@ public class FaceTrainFrame {
 	//public static final String picsDir = "../pics";
 
 	//RELEASE
-	public static final String outputFileName = "facemap/facesDB.csv";
-	public static final String exeFileName = "facemap/FaceMap.exe";
+	public static final String outputFileName = "./facesDB.csv";
+	public static final String exeFileName = "./FaceMap.exe";
 	public static final String picsDir = "pics";
 
 	public static String currentDir = ""; //set upon intialization
@@ -437,7 +437,7 @@ public class FaceTrainFrame {
 				while ((value = is.read()) != -1) {
 					System.out.print((char) value);
 				}*/
-				Process p = new ProcessBuilder("./facemap/FaceMap.exe","./facesDB.csv").start();
+				Process p = new ProcessBuilder("./FaceMap.exe","./facesDB.csv").start();
 				int exitCode = p.waitFor();
 
 				System.out.println("exited with " + exitCode);
@@ -460,4 +460,3 @@ public class FaceTrainFrame {
 		}
 	}
 }
-
