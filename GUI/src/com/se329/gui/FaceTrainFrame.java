@@ -45,9 +45,9 @@ public class FaceTrainFrame {
 	public static final String outputFileName = "facemap/facesDB.csv";
 	public static final String exeFileName = "facemap/FaceMap.exe";
 	public static final String picsDir = "pics";
-	
+
 	public static String currentDir = ""; //set upon intialization
-	
+
 	private static FileWriter writer = null;
 
 	private static JFrame frmFaceTrainer;
@@ -86,12 +86,12 @@ public class FaceTrainFrame {
 			String jarDir = jarFile.getParentFile().getPath();
 			currentDir = jarDir;
 			System.out.println(currentDir);
-			
+
 		} catch (URISyntaxException e1) {
 			e1.printStackTrace();
 			System.exit(1);
 		}
-		
+
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -140,17 +140,17 @@ public class FaceTrainFrame {
 				}
 				System.out.println("Size of arraylist " + subjects.size());
 				setTableData();
-				
+
 				DefaultTableModel model = (DefaultTableModel) table.getModel();
 				model.setDataVector(tableData, columnNames);
-				
+
 				//table = new JTable(new DefaultTableModel(tableData, columnNames));
 				//GridBagConstraints gbc_table = new GridBagConstraints();
 				//gbc_table.fill = GridBagConstraints.BOTH;
 				//gbc_table.gridx = 0;
 				//gbc_table.gridy = 0;
 				//panel_1.add(table, gbc_table);
-				
+
 				frmFaceTrainer.getContentPane().validate();
 				frmFaceTrainer.getContentPane().repaint();
 				//initialize();
@@ -177,12 +177,12 @@ public class FaceTrainFrame {
 		System.out.println("adding subject...");
 		Firebase subjectRef = firebaseRef.child("subjects");
 		System.out.println(currSub.getName());
-		
+
 		//Map<String, String> subj1 = new HashMap<String, String>();
 		//subj1.put("name", currSub.getName());
 		//subj1.put("timesAttended", Integer.toString(currSub.getTimesAttended()));
 		//subj1.put( "photoPaths", currSub.getPhotoPaths().toString());
-			
+
 		Firebase newSubjectRef = subjectRef.push();
 		newSubjectRef.setValue(currSub);
 		//subjectRef.push().setValue(subj1);
@@ -269,7 +269,7 @@ public class FaceTrainFrame {
 		photoButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String photoName = selectPhoto();
-				if (photoName != null)			
+				if (photoName != null)
 					currSub.appendPhotoPath("../pics/" + selectPhoto());
 			}
 		});
@@ -336,7 +336,7 @@ public class FaceTrainFrame {
 				createFile();
 
 				startFaceRecognition();
-				
+
 				// Close frame
 				frmFaceTrainer.setVisible(false);
 				frmFaceTrainer.dispose();
@@ -368,7 +368,7 @@ public class FaceTrainFrame {
 
 	private static String selectPhoto() {
 		String picsFilePath = new File(currentDir, picsDir).toString();
-		
+
 		File photo;
 		JFileChooser chooser = new JFileChooser(picsFilePath);
 		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -385,7 +385,7 @@ public class FaceTrainFrame {
 	}
 
 	private boolean createFile() {
-		
+
 		try {
 			String outputFilePath = new File(currentDir, outputFileName).toString();
 			writer = new FileWriter(outputFilePath, false);
@@ -423,19 +423,20 @@ public class FaceTrainFrame {
 	private void startFaceRecognition() {
 		File outputFile = new File(outputFileName);
 		String outputFileNameOnly = outputFile.getName();
-		
+
 		String exeFilePath = new File(currentDir, exeFileName).toString();
-		
+
 		if (new File(exeFilePath).exists()) {
 			try {
-				ProcessBuilder pb = new ProcessBuilder(exeFilePath,
+				/*ProcessBuilder pb = new ProcessBuilder(exeFilePath,
 						outputFileNameOnly);
 				pb.redirectError();
 				Process p = pb.start();
 				InputStream is = p.getInputStream();
 				int value = -1;
 				while ((value = is.read()) != -1) {
-					System.out.print((char) value);
+					System.out.print((char) value);*/
+					Process process = new ProcessBuilder("./facemap/FaceMap.exe","./facesDB.csv").start();
 				}
 
 				int exitCode = p.waitFor();
