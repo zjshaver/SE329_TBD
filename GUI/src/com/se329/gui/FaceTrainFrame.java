@@ -38,12 +38,12 @@ public class FaceTrainFrame {
 
 	//DEBUG
 	//public static final String outputFileName = "../facemap/facesDB.csv";
-	//public static final String exeFilePath = "../faceMap.exe";
+	//public static final String exeFilePath = "../facemap/faceMap.exe";
 	//public static final String picsDir = "../pics";
 
 	//RELEASE
-	public static final String outputFileName = "facesDB.csv";
-	public static final String exeFileName = "faceMap.exe";
+	public static final String outputFileName = "facemap/facesDB.csv";
+	public static final String exeFileName = "facemap/FaceMap.exe";
 	public static final String picsDir = "pics";
 	
 	public static String currentDir = ""; //set upon intialization
@@ -421,13 +421,15 @@ public class FaceTrainFrame {
 	}
 
 	private void startFaceRecognition() {
-		// TODO
+		File outputFile = new File(outputFileName);
+		String outputFileNameOnly = outputFile.getName();
+		
 		String exeFilePath = new File(currentDir, exeFileName).toString();
+		
 		if (new File(exeFilePath).exists()) {
 			try {
-
 				ProcessBuilder pb = new ProcessBuilder(exeFilePath,
-						outputFileName);
+						outputFileNameOnly);
 				pb.redirectError();
 				Process p = pb.start();
 				InputStream is = p.getInputStream();
